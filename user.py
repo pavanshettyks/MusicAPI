@@ -18,5 +18,9 @@ def InserUser():
         if request.method == 'POST':
             return jsonify("test post")
 
+@app.route('/user',methods=['PATCH'])
+def UpdateUserPwd():
+        if request.method == 'PATCH':
+            return jsonify("test patch")
 
 app.run()
