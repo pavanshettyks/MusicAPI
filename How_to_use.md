@@ -1,4 +1,6 @@
-To run the app:  FLASK_APP=user flask run
+To run the app:  
+FLASK_APP=user flask init
+FLASK_APP=user flask run
 
 
 USER Microservice
@@ -16,6 +18,6 @@ PATCH:  curl -d "param1=value1&param2=value2" -X PATCH curl  http://127.0.0.1:50
 
 Description Microservice:
 
-GET:  curl  http://127.0.0.1:5000/api/v1/resources/descriptions?username=pk&track_url=12sdf
+GET:  curl  http://127.0.0.1:5000/api/v1/resources/descriptions?username=user_pavan2&track_url=/tracks?url=%22Yeah.mp3%22
 
-POST:  curl -d "param1=value1&param2=value2" -X POST curl  http://127.0.0.1:5000/api/v1/resources/descriptions
+POST:  curl -X POST curl  http://127.0.0.1:5000/api/v1/resources/descriptions -d '{"username":"test1", "track_url":"vale","description":"dddasd"}'

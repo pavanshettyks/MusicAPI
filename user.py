@@ -20,11 +20,10 @@ def GetUser():
             if username and password:
                 #Todo
                 #call the db and check user is present and get the hashed password and match it
-
-
                 hashed_password = generate_password_hash(password)
                 authenticated = check_password_hash(hashed_password,password)
                 data = hashed_password + ' ' + password + ' '+ str(authenticated)
+                
                 return jsonify(data)
             elif username:
                 #Todo
