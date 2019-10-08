@@ -21,3 +21,5 @@ Description Microservice:
 GET:  curl  http://127.0.0.1:5000/api/v1/resources/descriptions?username=user_pavan2&track_url=/tracks?url=%22Yeah.mp3%22
 
 POST:  curl -X POST curl  http://127.0.0.1:5000/api/v1/resources/descriptions -d '{"username":"test1", "track_url":"vale","description":"dddasd"}'
+
+query ="INSERT INTO description(username, track_url, description) VALUES('test','test','domething');"

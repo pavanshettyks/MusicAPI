@@ -54,14 +54,10 @@ def GetDescription():
                 query = "SELECT * FROM description WHERE username=? AND  track_url=? ;"
                 to_filter.append(username)
                 to_filter.append(track_url)
-
                 results = query_db(query, to_filter)
                 if not results:
                     return jsonify("No description present"),404
                 return jsonify(results),200
-
-
-                #return jsonify(username+"description coming soon")
 
 
 #TO create new description
@@ -72,11 +68,28 @@ def InserUser():
             user_name = data['username']
             track_url = data['track_url']
             description = data['description']
+            to_filter = []
             if user_name and track_url and description:
             #get json data verify username is present and track is present. then insert it to db
-                return jsonify(user_name),201
-            else:
-                return jsonify("Mandatory data not supplied")
-            #try
+                query ="INSERT INTO description(username, track_url, description) VALUES('"+user_name+"','"+track_url+"','"+description+"');"
+                print(query)
+                to_filter.append(user_name)
+                to_filter.append(track_url)
+                to_filter.append(description)
+                executionState:bool = False
+                cur = get_db().cursor()
+                try:
+                    cur.execute(query)
+                    if(cur.rowcount >=1):
+                        executionState = True
+                    get_db().commit()
+                except:
+                    get_db().rollback()
+                    print("Error")
+                finally:
+                    if executionState:
+                        return jsonify(message="Data Instersted Sucessfully"),201
+                    else:
+                        return jsonify(message="Failed to insert data"), 409
 
 app.run()
