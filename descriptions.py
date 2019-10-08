@@ -69,6 +69,7 @@ def InserUser():
             track_url = data['track_url']
             description = data['description']
             to_filter = []
+            #print(request.json['username'])
             if user_name and track_url and description:
             #get json data verify username is present and track is present. then insert it to db
                 query ="INSERT INTO description(username, track_url, description) VALUES('"+user_name+"','"+track_url+"','"+description+"');"
