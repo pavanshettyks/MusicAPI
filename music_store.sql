@@ -1,9 +1,12 @@
 -- $ sqlite3 music_store.db < sqlite.sql
 
-PRAGMA foreign_keys=OFF;
+PRAGMA foreign_keys=ON;
 BEGIN TRANSACTION;
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS description;
+DROP TABLE IF EXISTS tracks;
+DROP TABLE IF EXISTS playlist;
+DROP TABLE IF EXISTS playlist_tracks;
 
 CREATE TABLE user (
 	username VARCHAR primary key,
@@ -19,9 +22,12 @@ INSERT INTO user(username, display_name, homepage_url, email) VALUES('user_priya
 
 
 CREATE TABLE description (
-	username VARCHAR primary key,
+	username VARCHAR,
 	track_url VARCHAR,
-	description VARCHAR
+	description VARCHAR,
+	description_id INTEGER primary key,
+	FOREIGN KEY (username) REFERENCES user (username),
+	FOREIGN KEY (track_url) REFERENCES tracks (track_url)
 );
 
 INSERT INTO description(username, track_url, description) VALUES('user_pavan','/tracks?url="Stronger.mp3"', 'workout song by kanye west');
@@ -52,9 +58,10 @@ INSERT INTO playlist(playlist_title, username, description) VALUES('All','user_p
 INSERT INTO playlist(playlist_title, username, description) VALUES('Some','user_anthony', 'This playlist contains some of my songs');
 
 CREATE TABLE playlist_tracks (
-	username VARCHAR primary key,
+	username VARCHAR,
 	title VARCHAR primary key,
-	track_url VARCHAR
+	track_url VARCHAR,
+	FOREIGN KEY (username) REFERENCES user(username)
 );
 
 INSERT INTO playlist_tracks(username, title, track_url) VALUES('user_priyanka','All', '/tracks?url="Stronger.mp3"');
