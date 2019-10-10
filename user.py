@@ -8,7 +8,43 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 
 
+#################code will be moved
+def make_dicts(cursor, row):
+    return dict((cursor.description[idx][0], value)
+                for idx, value in enumerate(row))
 
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect('TESTDATABASE')
+        db.row_factory = make_dicts
+    return db
+
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+@app.cli.command('init')
+def init_db():
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('test.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+
+
+
+##################################
 #  To get user profile details &
 # To match user name and hashed password
 @app.route('/api/v1/resources/user',methods=['GET'])
@@ -16,39 +52,97 @@ def GetUser():
         if request.method == 'GET':
             query_parameters = request.args
             username = query_parameters.get('username')
-            password = query_parameters.get('hashed_password')
+            password = query_parameters.get('password')
+            to_filter= []
             if username and password:
                 #Todo
                 #call the db and check user is present and get the hashed password and match it
 
+                query = "SELECT hashed_password FROM user WHERE username=?;"
+                to_filter.append(username)
+                results = query_db(query, to_filter)
+                if not results:
+                    return jsonify(message="No user present. Please provide valid username"),404
+                #return jsonify(results[hashed_password]),200
+                authenticated = check_password_hash(results[0]['hashed_password'],password)
+                if authenticated:
+                    return jsonify(message="User Authentication successful. Username and stored password match"),200
 
-                hashed_password = generate_password_hash(password)
-                authenticated = check_password_hash(hashed_password,password)
-                data = hashed_password + ' ' + password + ' '+ str(authenticated)
-                return jsonify(data)
+                return jsonify(message="User Authentication unsuccessful. Username and stored password doent match. Try with new password"),200
+
             elif username:
                 #Todo
-                #call the db and check user is present and get the hashed password and match it
+                #call the db and check user . If yes retrieve the data
+                query = "SELECT username,display_name,email,homepage_url FROM user WHERE username=?;"
+                to_filter.append(username)
+                results = query_db(query, to_filter)
+                if not results:
+                    return jsonify(message="No user present. Please provide valid username"),404
+                return jsonify(results),200
 
-                return jsonify(username)
 
 
 #TO create new user
 @app.route('/api/v1/resources/user',methods=['POST'])
 def InserUser():
         if request.method == 'POST':
-            return jsonify("test post")
+            data = request.get_json(force= True)
+            #print(type(data))
+            username = data['username']
+            password = data['password']
+            display_name  = data['display_name']
+            email  = data['email']
+            homepage_url  = data['homepage_url']
+            hashed_password = generate_password_hash(password)
+            executionState:bool = False
+            query ="INSERT INTO user(username, display_name, hashed_password, homepage_url, email) VALUES('"+username+"','"+display_name+"','"+hashed_password+"','"+homepage_url+"','"+email+"');"
+            print(query)
+            cur = get_db().cursor()
+            try:
+                cur.execute(query)
+                if(cur.rowcount >=1):
+                    executionState = True
+                get_db().commit()
+            except:
+                get_db().rollback()
+                print("Error")
+            finally:
+                if executionState:
+                    return jsonify(message="Data Instersted Sucessfully"),201
+                else:
+                    return jsonify(message="Failed to insert data. User already present in the system"), 409
+
 
 #To update user password
-@app.route('/api/v1/resources/user',methods=['PATCH'])
+@app.route('/api/v1/resources/user',methods=['PUT'])
 def UpdateUserPwd():
-        if request.method == 'PATCH':
-            return jsonify("test patch")
+        if request.method == 'PUT':
+            return jsonify(message="test patch")
+
+
 
 #To delete user
-"""@app.route('/api/v1/resources/user',methods=['DELETE'])
-def UpdateUserPwd():
-        if request.method == 'PATCH':
-            return jsonify("test patch")"""
+@app.route('/api/v1/resources/user',methods=['DELETE'])
+def DeleteUser():
+        if request.method == 'DELETE':
+            query_parameters = request.args
+            username = query_parameters.get('username')
+            executionState:bool = False
+            cur = get_db().cursor()
+            try:
+                cur.execute("DELETE FROM user WHERE username=?",(username,))
+
+                if cur.rowcount >= 1:
+                    executionState = True
+                get_db().commit()
+
+            except:
+                    get_db().rollback()
+                    print("Error")
+            finally:
+                    if executionState:
+                        return jsonify(message="Data SucessFully deleted"), 200
+                    else:
+                        return jsonify(message="Failed to delete data"), 409
 
 app.run()
