@@ -18,6 +18,7 @@ def get_db():
     return db
 
 
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
@@ -51,12 +52,12 @@ def GetDescription():
             if username and track_url:
                 #Todo
                 #call the db and check user's is present and get the description
-                query = "SELECT * FROM description WHERE username=? AND  track_url=? ;"
+                query = "SELECT username,track_url,description FROM description WHERE username=? AND  track_url=? ;"
                 to_filter.append(username)
                 to_filter.append(track_url)
                 results = query_db(query, to_filter)
                 if not results:
-                    return jsonify("No description present"),404
+                    return jsonify(message="No description present"),404
                 return jsonify(results),200
 
 
@@ -65,19 +66,16 @@ def GetDescription():
 def InserUser():
         if request.method == 'POST':
             data =request.get_json(force= True)
-            user_name = data['username']
+            username = data['username']
             track_url = data['track_url']
             description = data['description']
-            to_filter = []
+            #to_filter = []
             #print(request.json['username'])
+            executionState:bool = False
             if user_name and track_url and description:
             #get json data verify username is present and track is present. then insert it to db
-                query ="INSERT INTO description(username, track_url, description) VALUES('"+user_name+"','"+track_url+"','"+description+"');"
+                query ="INSERT INTO description(username, track_url, description) VALUES('"+username+"','"+track_url+"','"+description+"');"
                 print(query)
-                to_filter.append(user_name)
-                to_filter.append(track_url)
-                to_filter.append(description)
-                executionState:bool = False
                 cur = get_db().cursor()
                 try:
                     cur.execute(query)
