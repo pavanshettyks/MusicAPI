@@ -118,14 +118,47 @@ def InserUser():
                     resp.status_code = 201
                     return resp
                 else:
-                    return jsonify(message="Failed to insert data. User already present in the system"), 409
+                    return jsonify(message="Failed to insert data."), 409
 
 
 #To update user password
-@app.route('/api/v1/resources/user',methods=['PUT'])
+@app.route('/api/v1/resources/user',methods=['PATCH'])
 def UpdateUserPwd():
-        if request.method == 'PUT':
-            return jsonify(message="test patch")
+        if request.method == 'PATCH':
+            to_filter = []
+            query_parameters = request.args
+            username = query_parameters.get('username')
+            data = request.get_json(force= True)
+            #print(type(data))
+            password = data['password']
+            hashed_password = generate_password_hash(password)
+            query = "SELECT * FROM user WHERE username=?;"
+            to_filter.append(username)
+            results = query_db(query, to_filter)
+            if not results:
+                return jsonify(message="No user present. Please provide valid username"),404
+            else:
+                executionState:bool = False
+                cur = get_db().cursor()
+                try:
+                    cur.execute("UPDATE user SET hashed_password=? WHERE username=?",(hashed_password,username,))
+                    if cur.rowcount >= 1:
+                        executionState = True
+                    get_db().commit()
+
+                except:
+                        get_db().rollback()
+                        #print("Error")
+                finally:
+                        if executionState:
+                            resp = jsonify(message="Password updated successfully")
+                            resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/user?username='+username
+                            resp.status_code = 200
+                            return resp
+
+                        else:
+                            return jsonify(message="Failed to update password"), 409
+
 
 
 
@@ -147,8 +180,8 @@ def DeleteUser():
                     get_db().rollback()
                     #print("Error")
             finally:
-                    if executionState:l
-                        return jsonify(message="Data SucessFully deleted"), 200
+                    if executionState:
+                        return jsonify(message="Data deleted sucessFully "), 200
                     else:
                         #possibly no user data . so 404
                         return jsonify(message="Failed to delete data"), 404
