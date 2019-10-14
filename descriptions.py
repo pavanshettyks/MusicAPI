@@ -71,11 +71,16 @@ def GetDescription():
 def InserUser():
         if request.method == 'POST':
             data =request.get_json(force= True)
+            to_filter = []
             username = data['username']
             track_url = data['track_url']
             description = data['description']
             executionState:bool = False
-            if username and track_url and description:
+            query = "SELECT username,track_url,description FROM description WHERE username=? AND  track_url=? ;"
+            to_filter.append(username)
+            to_filter.append(track_url)
+            results = query_db(query, to_filter)
+            if not results:
                 query ="INSERT INTO description(username, track_url, description) VALUES('"+username+"','"+track_url+"','"+description+"');"
                 print(query)
                 cur = get_db().cursor()
@@ -95,5 +100,8 @@ def InserUser():
                         return resp
                     else:
                         return jsonify(message="Failed to insert data"), 409
+            else:
+                return jsonify(message="Failed to insert data."), 409
+
 
 app.run()
