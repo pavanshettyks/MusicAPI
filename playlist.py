@@ -129,8 +129,13 @@ def GetAllPlaylist():
                 return jsonify(message="No playlist present"), 404
             else:
                 query = "SELECT track_url FROM playlist_tracks WHERE username=? AND playlist_title=?;"
-                results = query_db(query, to_filter)
+                all_tracks = query_db(query, to_filter)
+                for track in all_tracks:
+                    track['track_url'] = 'http://127.0.0.1:5000/api/v1/resources/tracks?track_url='+track['track_url']
+                results[0]['all_tracks']= all_tracks
+
                 resp = jsonify(results)
+
                 resp.headers['Location']='http://127.0.0.1:5000/api/v1/resources/playlist?username='+username+'&playlist_title='+playlist_title
                 resp.status_code = 200
                 return resp
