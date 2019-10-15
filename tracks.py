@@ -15,6 +15,7 @@ def get_db():
     if db is None:
         db = g._database = sqlite3.connect('test')
         db.row_factory = make_dicts
+    db.cursor().execute("PRAGMA foreign_keys=ON")
     return db
 
 
@@ -89,8 +90,11 @@ def GetTrack():
     results = query_db(query, to_filter)
     if not results:
         return jsonify("No track present"),404
-
-    return jsonify(results),200
+    else:
+        resp = jsonify(results)
+        #resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/tracks?track_url='+track_url
+        resp.status_code = 200
+        return resp
 
 
 #to post a new track
@@ -106,6 +110,7 @@ def InsertTrack():
             album_art_url = data['album_art_url']
 
             executionState:bool = False
+
             if track_title and track_url and album_title:
 
                 query ="INSERT INTO tracks(track_title, album_title, artist, length, track_url, album_art_url) VALUES('"+track_title+"','"+album_title+"','"+artist+"','"+length+"','"+track_url+"','"+album_art_url+"');"
@@ -121,11 +126,15 @@ def InsertTrack():
                     print("Error")
                 finally:
                     if executionState:
-                        return jsonify(message="Data Instersted Sucessfully"),201
+                        resp = jsonify(message="Data Inserted Successfully")
+                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/playlist?track_url='+track_url
+                        resp.status_code = 201
+                        return resp
                     else:
                         return jsonify(message="Failed to insert data"), 409
 
-
+            else:
+                return jsonify(message="Failed to insert data"),409
 
 
 
@@ -140,10 +149,12 @@ def EditTrack():
             length = data['length']
             track_url = data['track_url']
             album_art_url = data['album_art_url']
+            query_parameters = request.args
+            track_url_param = query_parameters.get('track_url')
 
             executionState:bool = False
-            if track_title and track_url and album_title:
-                query ="UPDATE tracks SET track_title='"+track_title+"', album_title='"+album_title+"', artist='"+artist+"', length='"+length+"', track_url='"+track_url+"', album_art_url='"+album_art_url+"'  WHERE track_url='"+track_url+"';"
+            if track_url == track_url_param:
+                query ="UPDATE tracks SET track_title='"+track_title+"', album_title='"+album_title+"', artist='"+artist+"', length='"+length+"', album_art_url='"+album_art_url+"'  WHERE track_url='"+track_url+"';"
                 print(query)
                 cur = get_db().cursor()
                 try:
@@ -153,12 +164,18 @@ def EditTrack():
                     get_db().commit()
                 except:
                     get_db().rollback()
-                    print("Error")
+                    #print("Error")
                 finally:
                     if executionState:
-                        return jsonify(message="Data edited Sucessfully"),204
+                        resp = jsonify(message="Data updated successfully")
+                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/tracks?track_url='+track_url
+                        resp.status_code = 200
+                        return resp
+
                     else:
                         return jsonify(message="Failed to edit data"), 409
+            else:
+                return jsonify(message="Failed to edit data"), 409
 
 
 
