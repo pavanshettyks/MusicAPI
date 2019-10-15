@@ -56,7 +56,8 @@ INSERT INTO description(username, track_url, description) VALUES('user_priyanka'
 INSERT INTO description(username, track_url, description) VALUES('user_anthony','tp3', 'classic black eyed peas song');
 
 CREATE TABLE playlist (
-	playlist_title VARCHAR primary key,
+	playlist_id INTEGER primary key,
+	playlist_title VARCHAR,
 	username VARCHAR,
 	description VARCHAR,
 	FOREIGN KEY (username) REFERENCES user(username)
@@ -70,7 +71,9 @@ CREATE TABLE playlist_tracks (
 	username VARCHAR,
 	playlist_title VARCHAR,
 	track_url VARCHAR,
-	FOREIGN KEY (username) REFERENCES user(username) ON DELETE CASCADE
+	FOREIGN KEY (username) REFERENCES user(username) ON DELETE CASCADE,
+	FOREIGN KEY (playlist_title) REFERENCES playlist(playlist_title) ON DELETE CASCADE,
+	FOREIGN KEY (track_url) REFERENCES tracks(track_url) ON DELETE CASCADE
 );
 
 INSERT INTO playlist_tracks(username, playlist_title, track_url) VALUES('user_priyanka','All', '/tracks?url="Stronger.mp3"');
