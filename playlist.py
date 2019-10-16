@@ -13,7 +13,7 @@ def make_dicts(cursor, row):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect('test')
+        db = g._database = sqlite3.connect('MUSICDATABASE')
         db.row_factory = make_dicts
     db.cursor().execute("PRAGMA foreign_keys=ON")
     return db
@@ -31,7 +31,7 @@ def close_connection(exception):
 def init_db():
     with app.app_context():
         db = get_db()
-        with app.open_resource('test.sql', mode='r') as f:
+        with app.open_resource('music_store.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
@@ -45,8 +45,20 @@ def query_db(query,args=(),one=False):
 
 
 
-#TO create new description
-@app.route('/api/v1/resources/descriptions',methods=['POST'])
+#TO create new playlist
+def generate_multiple_insert(all_tracks,username,playlist_title):
+    querry = "INSERT INTO playlist_tracks (username, playlist_title,track_url) VALUES"
+    value_querry = ""
+    for track in all_tracks:
+         value_querry = value_querry + "('"+username+"','"+playlist_title+"','"+track['track_url']+"') ,"
+    value_querry = value_querry[:-1]+';'
+    querry = querry + value_querry
+    #print(querry)
+    return querry
+
+
+#TO create new playlist
+@app.route('/api/v1/resources/playlist',methods=['POST'])
 def InsertPlaylist():
         if request.method == 'POST':
             data =request.get_json(force= True)
@@ -54,24 +66,29 @@ def InsertPlaylist():
             playlist_title = data['playlist_title']
             username = data['username']
             description = data['description']
+            all_tracks = data['all_tracks']
             executionState:bool = False
-            query = "SELECT playlist_title,username,description FROM playlist WHERE playlist_title=? ;"
+            query = "SELECT playlist_title FROM playlist WHERE playlist_title=? AND username =? ;"
             to_filter.append(playlist_title)
             to_filter.append(username)
-            to_filter.append(description)
             results = query_db(query, to_filter)
             if not results:
-                query ="INSERT INTO playkist(playlist_title,username, description) VALUES('"+playlist_title+"','"+username+"','"+description+"');"
-                print(query)
+                query ="INSERT INTO playlist(playlist_title,username, description) VALUES('"+playlist_title+"','"+username+"','"+description+"');"
                 cur = get_db().cursor()
+                cur2 = get_db().cursor()
                 try:
                     cur.execute(query)
                     if(cur.rowcount >=1):
                         executionState = True
+                    if all_tracks:
+                        multi_insert_querry = generate_multiple_insert(all_tracks,username,playlist_title)
+                        #print(multi_insert_querry)
+                        cur2.execute(multi_insert_querry)
+
                     get_db().commit()
                 except:
                     get_db().rollback()
-                    print("Error")
+                    print("error")
                 finally:
                     if executionState:
                         resp = jsonify(message="Data Instersted Sucessfully")
@@ -83,6 +100,28 @@ def InsertPlaylist():
             else:
                 return jsonify(message="Failed to insert data."), 409
 
+
+#to delete a playlist
+def delete_all_tracks(playlist_title,username):
+    to_filter = []
+    query = "SELECT * FROM playlist_tracks WHERE username=? AND playlist_title=?;"
+    to_filter.append(username)
+    to_filter.append(playlist_title)
+    res = query_db(query, to_filter)
+    cur = get_db().cursor()
+    if res:
+
+        try:
+            cur.execute("DELETE FROM playlist_tracks WHERE playlist_title=? AND username =?;",(playlist_title,username,))
+            if cur.rowcount >= 1:
+                executionState = True
+
+            get_db().commit()
+        except:
+                get_db().rollback()
+
+        finally:
+            print("deleted relevant playlist_tracks data")
 
 
 
@@ -96,7 +135,8 @@ def DeletePlaylist():
             executionState:bool = False
             cur = get_db().cursor()
             try:
-                cur.execute("DELETE FROM playlist WHERE playlist_title=? AND username =?",(playlist_title,username,))
+                cur.execute("DELETE FROM playlist WHERE playlist_title=? AND username =?;",(playlist_title,username,))
+
                 if cur.rowcount >= 1:
                     executionState = True
                 get_db().commit()
@@ -106,12 +146,14 @@ def DeletePlaylist():
                     #print("Error")
             finally:
                     if executionState:
+                        delete_all_tracks(playlist_title,username)
                         return jsonify(message="Data SucessFully deleted"), 200
                     else:
                         return jsonify(message="Failed to delete data"), 409
 
 
-#to list all playlists
+
+#to list  playlists
 @app.route('/api/v1/resources/playlist', methods=['GET'])
 def GetAllPlaylist():
     if request.method=='GET':
