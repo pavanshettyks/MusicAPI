@@ -92,7 +92,7 @@ def GetTrack():
         return jsonify("No track present"),404
     else:
         resp = jsonify(results)
-        #resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/tracks?track_url='+track_url
+        resp.headers['Location'] = 'http://127.0.0.1:5200/api/v1/resources/tracks'
         resp.status_code = 200
         return resp
 
@@ -127,7 +127,7 @@ def InsertTrack():
                 finally:
                     if executionState:
                         resp = jsonify(message="Data Inserted Successfully")
-                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/playlist?track_url='+track_url
+                        resp.headers['Location'] = 'http://127.0.0.1:5200/api/v1/resources/playlist?track_url='+track_url
                         resp.status_code = 201
                         return resp
                     else:
@@ -167,7 +167,7 @@ def EditTrack():
                 finally:
                     if executionState:
                         resp = jsonify(message="Data updated successfully")
-                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/tracks?track_url='+track_url
+                        resp.headers['Location'] = 'http://127.0.0.1:5200/api/v1/resources/tracks?track_url='+track_url
                         resp.status_code = 200
                         return resp
 
