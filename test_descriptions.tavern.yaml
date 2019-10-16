@@ -1,0 +1,44 @@
+---
+  test_name: retrieve valid users track description
+  stages:
+    - name: retrieve description
+      request:
+        url: http://127.0.0.1:5100/api/v1/resources/descriptions?username=user_priyanka&track_url=/home/student/Music/tracks/Yeah.mp3
+        method: GET
+      response:
+        status_code: 200
+---
+  test_name: retrieve invalid users track description
+  stages:
+    - name: retrieve description
+      request:
+        url: http://127.0.0.1:5100/api/v1/resources/descriptions?username=user_invalid&track_url=/home/student/Music/tracks/Yeah.mp3
+        method: GET
+      response:
+        status_code: 404
+---
+  test_name: set valid users description of track
+  stages:
+    - name: set description
+      request:
+        url: http://127.0.0.1:5100/api/v1/resources/descriptions
+        method: POST
+        json:
+          username: user_anthony
+          track_url: /home/student/Music/tracks/Yeah.mp3
+          description: Looks good
+      response:
+        status_code: 201
+---
+  test_name: set invalid users description of track
+  stages:
+    - name: set description
+      request:
+        url: http://127.0.0.1:5100/api/v1/resources/descriptions
+        method: POST
+        json:
+          username: user_invalid
+          track_url: /home/student/Music/tracks/Yeah.mp3
+          description: Looks good
+      response:
+        status_code: 409
