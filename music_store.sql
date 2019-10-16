@@ -14,15 +14,15 @@ DROP TABLE IF EXISTS tracks;
 
 CREATE TABLE user (
 	username VARCHAR primary key,
-	password VARCHAR,
+	hashed_password VARCHAR,
 	display_name VARCHAR,
 	homepage_url VARCHAR,
 	email VARCHAR
 );
 
-INSERT INTO user(username, display_name, password, homepage_url, email) VALUES('user_anthony','Anthony','12d3' ,'/user?username=user_anthony', 'anthony@csu.fullerton.edu');
-INSERT INTO user(username, display_name, password, homepage_url, email) VALUES('user_pavan','Pavan', '12ds','/user?username=user_pavan','pavan@csu.fullerton.edu');
-INSERT INTO user(username, display_name, password, homepage_url, email) VALUES('user_priyanka','Priyanka','ddr5', '/user?username=user_priyanka','priyanka@csu.fullerton.edu');
+INSERT INTO user(username, display_name, hashed_password, homepage_url, email) VALUES('user_anthony','Anthony','pbkdf2:sha256:150000$bGSxegkS$7598256a7ff683743b0dbe182ee77eec4afce1c8339914f482e4e626491b28b3' ,'/user?username=user_anthony', 'anthony@csu.fullerton.edu');
+INSERT INTO user(username, display_name, hashed_password, homepage_url, email) VALUES('user_pavan','Pavan', 'pbkdf2:sha256:150000$bGSxegkS$7598256a7ff683743b0dbe182ee77eec4afce1c8339914f482e4e626491b28b3','/user?username=user_pavan','pavan@csu.fullerton.edu');
+INSERT INTO user(username, display_name, hashed_password, homepage_url, email) VALUES('user_priyanka','Priyanka','pbkdf2:sha256:150000$bGSxegkS$7598256a7ff683743b0dbe182ee77eec4afce1c8339914f482e4e626491b28b3', '/user?username=user_priyanka','priyanka@csu.fullerton.edu');
 
 
 CREATE TABLE tracks (

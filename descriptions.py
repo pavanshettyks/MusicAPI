@@ -60,7 +60,7 @@ def GetDescription():
                     return jsonify(message="No description present"),404
                 else:
                     resp = jsonify(results)
-                    resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                    resp.headers['Location'] = 'http://127.0.0.1:5100/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
                     resp.status_code = 200
                     return resp
 
@@ -95,7 +95,7 @@ def InserUser():
                 finally:
                     if executionState:
                         resp = jsonify(message="Data Instersted Sucessfully")
-                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                        resp.headers['Location'] = 'http://127.0.0.1:5100/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
                         resp.status_code = 201
                         return resp
                     else:
