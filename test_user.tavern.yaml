@@ -1,0 +1,19 @@
+---
+  test_name: Retrieve a users profile
+  stages:
+  - name: Retrieve a users profile
+    request:
+      url: http://127.0.0.1:5000/api/v1/resources/user?username=user_pavan
+      method: GET
+    response:
+      status_code: 200
+---
+
+  test_name: Match username and password
+  stages:
+  - name: Match username and password
+    request:
+      url: http://127.0.0.1:5000/api/v1/resources/user?username=user_pavan&password=12ds
+      method: GET
+    response:
+      status_code: 200
