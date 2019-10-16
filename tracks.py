@@ -13,7 +13,7 @@ def make_dicts(cursor, row):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect('test')
+        db = g._database = sqlite3.connect('MUSICDATABASE')
         db.row_factory = make_dicts
     db.cursor().execute("PRAGMA foreign_keys=ON")
     return db
@@ -31,7 +31,7 @@ def close_connection(exception):
 def init_db():
     with app.app_context():
         db = get_db()
-        with app.open_resource('test.sql', mode='r') as f:
+        with app.open_resource('music_store.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
@@ -45,8 +45,8 @@ def query_db(query,args=(),one=False):
 
 
 
-#gets the track by title
 
+#To get all tracks
 @app.route('/api/v1/resources/tracks',methods=['GET'])
 def GetTrack():
     query_parameters = request.args
@@ -97,7 +97,7 @@ def GetTrack():
         return resp
 
 
-#to post a new track
+#To post a new track
 @app.route('/api/v1/resources/tracks',methods=['POST'])
 def InsertTrack():
         if request.method == 'POST':
@@ -111,7 +111,7 @@ def InsertTrack():
 
             executionState:bool = False
 
-            if track_title and track_url and album_title:
+            if track_url:
 
                 query ="INSERT INTO tracks(track_title, album_title, artist, length, track_url, album_art_url) VALUES('"+track_title+"','"+album_title+"','"+artist+"','"+length+"','"+track_url+"','"+album_art_url+"');"
                 print(query)
@@ -138,7 +138,7 @@ def InsertTrack():
 
 
 
-#to edit a track
+#To edit a track
 @app.route('/api/v1/resources/tracks',methods=['PUT'])
 def EditTrack():
         if request.method == 'PUT':
@@ -164,7 +164,6 @@ def EditTrack():
                     get_db().commit()
                 except:
                     get_db().rollback()
-                    #print("Error")
                 finally:
                     if executionState:
                         resp = jsonify(message="Data updated successfully")
@@ -179,7 +178,7 @@ def EditTrack():
 
 
 
-#to delete a track
+#To delete a track
 @app.route('/api/v1/resources/tracks', methods=['DELETE'])
 def DeleteTrack():
         if request.method == 'DELETE':
