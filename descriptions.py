@@ -13,7 +13,7 @@ def make_dicts(cursor, row):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect('TESTDATABASE')
+        db = g._database = sqlite3.connect('MUSICDATABASE')
         db.row_factory = make_dicts
     db.cursor().execute("PRAGMA foreign_keys=ON")
     return db
@@ -37,7 +37,7 @@ def query_db(query, args=(), one=False):
 def init_db():
     with app.app_context():
         db = get_db()
-        with app.open_resource('test.sql', mode='r') as f:
+        with app.open_resource('music_store.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
@@ -60,7 +60,7 @@ def GetDescription():
                     return jsonify(message="No description present"),404
                 else:
                     resp = jsonify(results)
-                    resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                    resp.headers['Location'] = 'http://127.0.0.1:5100/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
                     resp.status_code = 200
                     return resp
 
@@ -95,7 +95,7 @@ def InserUser():
                 finally:
                     if executionState:
                         resp = jsonify(message="Data Instersted Sucessfully")
-                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                        resp.headers['Location'] = 'http://127.0.0.1:5100/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
                         resp.status_code = 201
                         return resp
                     else:
