@@ -14,10 +14,18 @@ To a retrieve User's profile (GET method) use the following curl command:
 
   curl -v  'http://127.0.0.1:5000/api/v1/resources/user?username=user_pavan'
 
+You can authenticate user using 2 ways:
 
-To authenticate a User use the following curl command:
+  1. Using the POST request by passing only uesrname and password in json.
+          curl -X POST -v  http://127.0.0.1:5000/api/v1/resources/user -d  '{"username": "user_pavan",  "password": "12ds"}'
 
-GET:   curl -v  'http://127.0.0.1:5000/api/v1/resources/user?username=user_pavan&password=12ds'
+      Note: If other fields are passed in json, then it will be treated as create new user scenario.
+
+
+  2. Using the GET request by passing the uesrname and password in the url parameters (not advised because of security concerns):   
+        curl -v  'http://127.0.0.1:5000/api/v1/resources/user?username=user_pavan&password=12ds'
+
+
 
 
 To create a new User profile use the following curl command (POST method):
@@ -40,10 +48,9 @@ DELETE: curl -X DELETE -v  'http://127.0.0.1:5000/api/v1/resources/user?username
 # Description Microservice:
 
 Retrieve a User’s Description of a track
-
-GET:  curl  http://127.0.0.1:5000/api/v1/resources/descriptions?username=user_pavan2&track_url=/tracks?url=%22Yeah.mp3%22
+GET:  curl 'http://127.0.0.1:5100/api/v1/resources/descriptions?username=user_priyanka&track_url=/home/student/Music/tracks/Yeah.mp3'
 
 
 To set a User’s Description of a track  use the following curl command:
 
-POST:  curl -X POST  http://127.0.0.1:5000/api/v1/resources/descriptions -d '{"username":"user_pavan", "track_url":"vale","description":"Looks good"}'
+POST:  curl -X POST -v http://127.0.0.1:5100/api/v1/resources/descriptions -d '{"username":"user_anthony", "track_url":"/home/student/Music/tracks/Yeah.mp3","description":"Looks good"}'

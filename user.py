@@ -47,6 +47,22 @@ def init_db():
 
 
 ##################################
+
+def authenticate_user(username,password):
+    query = "SELECT hashed_password FROM user WHERE username=?;"
+    to_filter= []
+    to_filter.append(username)
+    results = query_db(query, to_filter)
+    if not results:
+        return jsonify(message="User Authentication unsuccessful. Try with new password"),401
+
+    authenticated = check_password_hash(results[0]['hashed_password'],password)
+    if authenticated:
+        return jsonify(message="User Authentication successful"),200
+
+    return jsonify(message="User Authentication unsuccessful. Try with new password"),401
+
+
 #  To get user profile details &
 # To match user name and hashed password
 @app.route('/api/v1/resources/user',methods=['GET'])
@@ -58,17 +74,7 @@ def GetUser():
             to_filter= []
             if username and password:
                 #call the db and check user is present and get the hashed password and match it
-                query = "SELECT hashed_password FROM user WHERE username=?;"
-                to_filter.append(username)
-                results = query_db(query, to_filter)
-                if not results:
-                    return jsonify(message="User Authentication unsuccessful. Try with new password"),401
-
-                authenticated = check_password_hash(results[0]['hashed_password'],password)
-                if authenticated:
-                    return jsonify(message="User Authentication successful"),200
-
-                return jsonify(message="User Authentication unsuccessful. Try with new password"),401
+                return authenticate_user(username,password)
 
             elif username:
                 #call the db and check user . If yes retrieve the data
@@ -93,15 +99,21 @@ def InserUser():
         if request.method == 'POST':
             data = request.get_json(force= True)
             #print(type(data))
+            required_fields = ['username', 'display_name', 'password', 'homepage_url', 'email']
             username = data['username']
             password = data['password']
+
+            #To check username and password matching
+            if not all([field in data for field in required_fields]):
+                return authenticate_user(username,password)
+
             display_name  = data['display_name']
             email  = data['email']
             homepage_url  = data['homepage_url']
             hashed_password = generate_password_hash(password)
             executionState:bool = False
             query ="INSERT INTO user(username, display_name, hashed_password, homepage_url, email) VALUES('"+username+"','"+display_name+"','"+hashed_password+"','"+homepage_url+"','"+email+"');"
-            print(query)
+            #print(query)
             cur = get_db().cursor()
             try:
                 cur.execute(query)
