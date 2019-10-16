@@ -173,7 +173,7 @@ def GetAllPlaylist():
                 query = "SELECT track_url FROM playlist_tracks WHERE username=? AND playlist_title=?;"
                 all_tracks = query_db(query, to_filter)
                 for track in all_tracks:
-                    track['track_url'] = 'http://127.0.0.1:5300/api/v1/resources/tracks?track_url='+track['track_url']
+                    track['track_url'] = 'http://127.0.0.1:5200/api/v1/resources/tracks?track_url='+track['track_url']
                 results[0]['all_tracks']= all_tracks
 
                 resp = jsonify(results)
