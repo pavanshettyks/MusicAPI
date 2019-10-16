@@ -15,6 +15,7 @@ def get_db():
     if db is None:
         db = g._database = sqlite3.connect('TESTDATABASE')
         db.row_factory = make_dicts
+    db.cursor().execute("PRAGMA foreign_keys=ON")
     return db
 
 
@@ -50,7 +51,6 @@ def GetDescription():
             track_url = query_parameters.get('track_url')
             to_filter = []
             if username and track_url:
-                #Todo
                 #call the db and check user's is present and get the description
                 query = "SELECT username,track_url,description FROM description WHERE username=? AND  track_url=? ;"
                 to_filter.append(username)
@@ -58,7 +58,12 @@ def GetDescription():
                 results = query_db(query, to_filter)
                 if not results:
                     return jsonify(message="No description present"),404
-                return jsonify(results),200
+                else:
+                    resp = jsonify(results)
+                    resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                    resp.status_code = 200
+                    return resp
+
 
 
 #TO create new description
@@ -66,14 +71,16 @@ def GetDescription():
 def InserUser():
         if request.method == 'POST':
             data =request.get_json(force= True)
+            to_filter = []
             username = data['username']
             track_url = data['track_url']
             description = data['description']
-            #to_filter = []
-            #print(request.json['username'])
             executionState:bool = False
-            if user_name and track_url and description:
-            #get json data verify username is present and track is present. then insert it to db
+            query = "SELECT username,track_url,description FROM description WHERE username=? AND  track_url=? ;"
+            to_filter.append(username)
+            to_filter.append(track_url)
+            results = query_db(query, to_filter)
+            if not results:
                 query ="INSERT INTO description(username, track_url, description) VALUES('"+username+"','"+track_url+"','"+description+"');"
                 print(query)
                 cur = get_db().cursor()
@@ -87,8 +94,14 @@ def InserUser():
                     print("Error")
                 finally:
                     if executionState:
-                        return jsonify(message="Data Instersted Sucessfully"),201
+                        resp = jsonify(message="Data Instersted Sucessfully")
+                        resp.headers['Location'] = 'http://127.0.0.1:5000/api/v1/resources/descriptions?username='+username+'&'+'track_url='+track_url
+                        resp.status_code = 201
+                        return resp
                     else:
                         return jsonify(message="Failed to insert data"), 409
+            else:
+                return jsonify(message="Failed to insert data."), 409
+
 
 app.run()

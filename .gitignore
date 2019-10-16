@@ -1,1 +1,8 @@
-test.sql
+
+__pycache__
+ test
+ test.sql
+ .gitignore
+TESTDATABASE
+cmd
+
