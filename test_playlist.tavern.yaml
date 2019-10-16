@@ -1,0 +1,53 @@
+---
+  test_name: create a new playlist
+  stages:
+    - name: create playlist
+      request:
+        url: http://127.0.0.1:5300/api/v1/resources/playlist
+        method: POST
+        json:
+          all_tracks:
+            track_url: tp3
+            track_url: bp3
+            track_url: mp3
+          playlist_title: AllIsWell
+          username: user_priyanka
+          description: One2Three
+      response:
+        status_code: 201
+---
+  test_name: retrieve playlist
+  stages:
+    - name: retrieve playlist
+      request:
+        url: http://127.0.0.1:5300/api/v1/resources/playlist?playlist_title=All&username=user_priyanka
+        method: GET
+      response:
+        status_code: 200
+---
+  test_name: delete playlist
+  stages:
+    - name: delete playlist
+      request:
+        url: http://127.0.0.1:5300/api/v1/resources/playlist?username=user_priyanka&playlist_title=All
+        method: DELETE
+      response:
+        status_code: 200
+---
+  test_name: list all playlist
+  stages:
+    - name: list all playlist
+      request:
+        url: http://127.0.0.1:5300/api/v1/resources/playlist
+        method: GET
+      response:
+        status_code: 200
+---
+  test_name: list playlist created by user
+  stages:
+    - name: list playlist created by user
+      request:
+        url: http://127.0.0.1:5300/api/v1/resources/playlist?username=user_anthony
+        method: GET
+      response:
+        status_code: 200
