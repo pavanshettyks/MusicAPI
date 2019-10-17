@@ -49,8 +49,15 @@ def query_db(query,args=(),one=False):
 def generate_multiple_insert(all_tracks,username,playlist_title):
     querry = "INSERT INTO playlist_tracks (username, playlist_title,track_url) VALUES"
     value_querry = ""
+    track_url =""
     for track in all_tracks:
-         value_querry = value_querry + "('"+username+"','"+playlist_title+"','"+track['track_url']+"') ,"
+         val = track['track_url'].split('/api/v1/resources/tracks?track_url=')
+
+         if len(val) == 1:
+             track_url = val[0]
+         else:
+             track_url = val[1]
+         value_querry = value_querry + "('"+username+"','"+playlist_title+"','"+track_url+"') ,"
     value_querry = value_querry[:-1]+';'
     querry = querry + value_querry
     #print(querry)
@@ -88,7 +95,8 @@ def InsertPlaylist():
                     get_db().commit()
                 except:
                     get_db().rollback()
-                    print("error")
+                    executionState = False
+                    #print("error")
                 finally:
                     if executionState:
                         resp = jsonify(message="Data Instersted Sucessfully")
@@ -173,7 +181,7 @@ def GetAllPlaylist():
                 query = "SELECT track_url FROM playlist_tracks WHERE username=? AND playlist_title=?;"
                 all_tracks = query_db(query, to_filter)
                 for track in all_tracks:
-                    track['track_url'] = 'http://127.0.0.1:5300/api/v1/resources/tracks?track_url='+track['track_url']
+                    track['track_url'] = 'http://127.0.0.1:5200/api/v1/resources/tracks?track_url='+track['track_url']
                 results[0]['all_tracks']= all_tracks
 
                 resp = jsonify(results)
