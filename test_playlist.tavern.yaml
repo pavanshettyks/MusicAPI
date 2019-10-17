@@ -6,7 +6,10 @@
         url: http://127.0.0.1:5300/api/v1/resources/playlist
         method: POST
         json:
-          all_tracks: null
+          all_tracks:
+            -
+              track_url: /home/student/Music/tracks/Stronger.mp3
+              track_url: /home/student/Music/tracks/Yeah.mp3
           playlist_title: AllIsWell
           username: user_priyanka
           description: One2Three
