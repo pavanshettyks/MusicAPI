@@ -7,9 +7,9 @@
         method: POST
         json:
           all_tracks:
-            track_url: tp3
-            track_url: bp3
-            track_url: mp3
+            -
+              track_url: /home/student/Music/tracks/Stronger.mp3
+              track_url: /home/student/Music/tracks/Yeah.mp3
           playlist_title: AllIsWell
           username: user_priyanka
           description: One2Three
